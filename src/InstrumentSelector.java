@@ -1,22 +1,24 @@
+/*
+ * Copyright 2007 Phidgets Inc.  All rights reserved.
+ */
+
+import java.util.ArrayList;
+
 import com.phidgets.*;
 import com.phidgets.event.*;
 
 public class InstrumentSelector {
-//	private String[] instrument = {"guitar", "drums"};
-	public InstrumentSelector() {
-		System.out.println("instatiating");
-	}
-	
-	public static void main(String args[]) throws Exception {
-		RFIDPhidget rfid1;//, rfid2;
-		TagListener tl = new TagListener();
+	private ArrayList<String> instruments;
+	private String instrument;
 
-		// System.out.println(Phidget.getLibraryVersion());
-
-		System.out.println("instatiating");
+	public InstrumentSelector() throws Exception {	
+		instruments = new ArrayList<String>();
+		instruments.add("0107ee5fcf"); instruments.add("0106933e94"); instruments.add("0107ee5fcf");
+		
+		RFIDPhidget rfid1;
+		//		TagListener tl = new TagListener();
+		//		System.out.println("instatiating");
 		rfid1 = new RFIDPhidget();
-		//rfid2 = new RFIDPhidget();
-
 		System.out.println("adding listneners");
 		rfid1.addAttachListener(new AttachListener() {
 			public void attached(AttachEvent ae) {
@@ -29,39 +31,23 @@ public class InstrumentSelector {
 			}
 		});
 
-		/*
-		rfid2.addAttachListener(new AttachListener() {
-			public void attached(AttachEvent ae) {
-				try {
-					((RFIDPhidget) ae.getSource()).setAntennaOn(true);
-					((RFIDPhidget) ae.getSource()).setLEDOn(true);
-				} catch (PhidgetException ex) {
-				}
-				System.out.println("attachment of " + ae);
+		rfid1.addTagGainListener(new TagListener() {
+			public void tagGained(TagGainEvent tge) {
+				instrument = tge.getValue();
+				//				System.out.println("I am now a: " + instrument);
 			}
 		});
-		*/
-
-		/*
-		 * rfid.addDetachListener(new DetachListener() { public void
-		 * detached(DetachEvent ae) { System.out.println("detachment of " + ae);
-		 * } }); rfid.addErrorListener(new ErrorListener() { public void
-		 * error(ErrorEvent ee) { System.out.println("error event for " + ee); }
-		 * });
-		 */
-
-		rfid1.addTagGainListener(tl);
-		rfid1.addTagLossListener(tl);
-		//rfid2.addTagGainListener(tl);
-		//rfid2.addTagLossListener(tl);
-
-		
+		rfid1.addTagLossListener(new TagListener() {
+			public void tagLost(TagLossEvent tle) {
+				System.out.println("Tag lost. Before it was: " + instrument);
+			}
+		});
 		rfid1.addOutputChangeListener(new OutputChangeListener() { 
 			public void outputChanged(OutputChangeEvent oe) { 
 				System.out.println(oe); 
 			} 
 		});
-		
+
 
 		System.out.println("opening");
 		rfid1.openAny();
@@ -78,12 +64,20 @@ public class InstrumentSelector {
 		System.in.read();
 		System.out.print("closing...");
 		rfid1.close();
-		//rfid2.close();
-		// rfid = null;
-		// System.out.println(" ok");
-		// if (false) {
-		// System.out.println("wait for finalization...");
-		// System.gc();
-		// }
+	}
+
+
+	public static final void main(String args[]) throws Exception {
+		new InstrumentSelector();
+	}
+
+	public int getInstrument() {
+//		for (int i = 0; i < instruments.length; i++) { 
+//			if(instruments[i].equals(instrument)) {
+//				return i;
+//			}
+//		}
+//		return 0;
+		return instruments.indexOf(instrument);
 	}
 }
